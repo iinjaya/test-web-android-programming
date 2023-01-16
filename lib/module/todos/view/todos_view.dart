@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/alert.dart';
 import 'package:todo_app/core.dart';
+import 'package:todo_app/module/todos/widget/bottom_sheet_show.dart';
+import 'package:todo_app/module/todos/widget/container_form.dart';
 
 class TodosView extends StatefulWidget {
   const TodosView({Key? key}) : super(key: key);
-
-  Widget get devider => Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        width: 50,
-        height: 5,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.indigo,
-        ),
-      );
 
   Widget build(context, TodosController controller) {
     controller.view = this;
@@ -27,105 +19,64 @@ class TodosView extends StatefulWidget {
         controller.cleanUp();
       }
 
-      showModalBottomSheet(
-        context: context,
-        elevation: 5,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
+      bottomSheetShow(children: [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 20),
+            child: Text(
+              header.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.indigo,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
-        builder: (context) {
-          return Container(
-            padding: EdgeInsets.only(
-              top: 15,
-              left: 25,
-              right: 25,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Center(child: devider),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10, bottom: 20),
-                    child: Text(
-                      header.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.indigo,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                TextFormField(
-                  controller: controller.title,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.key, color: Colors.orange),
-                    hintText: 'Title',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: controller.description,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.sort, color: Colors.green),
-                    hintText: 'Description',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: controller.content,
-                  maxLines: 10,
-                  minLines: 1,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.source_outlined, color: Colors.red),
-                    border: OutlineInputBorder(),
-                    hintText: 'Your idea is here....',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    fixedSize: Size(Get.width / 4, 30),
-                  ),
-                  onPressed: () async {
-                    final result = id == null
-                        ? await controller.save()
-                        : await controller.todo.updateItem(
-                            id: id.toString(),
-                            values: controller.item,
-                          );
-                    if (result == 0) {
-                      Alert(message: 'TITLE NOT EMPTY', status: false).show();
-                      return;
-                    }
-                    Alert(
-                      message: '$header success',
-                      status: true,
-                    ).show(callback: () {
-                      controller.update();
-                      Get.back();
-                      controller.cleanUp();
-                    });
-                  },
-                  child: const Text("Save"),
-                ),
-              ],
-            ),
-          );
-        },
-      );
+        ContainerForm.text(
+          hintText: 'Type an title',
+          label: 'Title',
+          icon: Icons.key,
+          color: Colors.orange,
+          controller: controller.title,
+        ),
+        const SizedBox(height: 10),
+        ContainerForm.text(
+          hintText: 'Type an description',
+          label: 'Descrption',
+          icon: Icons.sort,
+          color: Colors.green.shade500,
+          controller: controller.description,
+        ),
+        const SizedBox(height: 10),
+        ContainerForm.text(
+          hintText: 'Your idea is here',
+          label: 'Task',
+          icon: Icons.event_note_sharp,
+          color: Colors.red.shade500,
+          controller: controller.content,
+        ),
+        const SizedBox(height: 10),
+        ContainerForm.button(
+          label: 'save',
+          onPressed: () async {
+            final result = id == null
+                ? await controller.save()
+                : await controller.todo.updateItem(
+                    id: id.toString(),
+                    values: controller.item,
+                  );
+            if (result == 0) {
+              Alert(message: 'TITLE NOT EMPTY', status: false).show();
+              return;
+            }
+            Alert(message: '$header success', status: true).show(callback: () {
+              controller.update();
+              Get.back();
+              controller.cleanUp();
+            });
+          },
+        ),
+      ]);
     }
 
     return Scaffold(
